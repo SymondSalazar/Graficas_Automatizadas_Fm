@@ -134,13 +134,11 @@ y_lin = m*np.array(x_points)+b
 
 
 #Se agarra dos puntos aleatorios para calcular la pendiente
-x_1 = rd.choice(x_points)
-x_2 = rd.choice(x_points)
-while x_1 == x_2 or x_1 < x_2:
-    x_1 = rd.choice(x_points)
-    x_2 = rd.choice(x_points)
-y_1 = m*x_1+b
-y_2 = m*x_2+b
+x_1 = x_points[0] + f_x * rd.randint(0, 10)
+x_2 = x_points[-2] + f_x * rd.randint(0, 10)
+
+y_1 = m*x_1 + b
+y_2 = m*x_2 + b
 
 #Calculo donde se veria en la grafica milimetrada
 closest_x_1, n_x_1, closest_y_1, n_y_1 = find_closest_coords(x_points, y_points, x_1, y_1, f_x, f_y)
@@ -148,23 +146,26 @@ closest_x_2, n_x_2, closest_y_2, n_y_2 = find_closest_coords(x_points, y_points,
 points_m_x = [closest_x_1+f_x*n_x_1,closest_x_2+f_x*n_x_2]
 points_m_y = [closest_y_1+f_y*n_y_1,closest_y_2+f_y*n_y_2]
 
+b = -(find_closest_coords(x_points, y_points, 0, -b, f_x, f_y)[2] + f_y*find_closest_coords(x_points, y_points, 0, -b, f_x, f_y)[3])
+
 
 
 for i, (x, y) in enumerate(zip(points_m_x, points_m_y)):
-    plt.text(x+6*f_x, y-6*f_y, f'P{i+1} ({x:.2f}, {y:.2f})', fontsize=8, ha='right', color='blue',weight="bold")
+    plt.text(x+6*f_x, y-6*f_y, f'P{i+1} ({x:.2f}, {y:.2f})', fontsize=8, ha='right', color='red',weight="bold")
 
 ###Calculo de la pendiente
 pendiente = (points_m_y[1]-points_m_y[0])/(points_m_x[1]-points_m_x[0])
-plt.plot(np.array(x_points),y_lin,"-", label=rf"$Ecuacion empirica: {var_y} = {pendiente:.2f}*{var_x} + ({b:.2f})$",color="#fff766")
+
+plt.plot(np.array(x_points),y_lin,"-", label=rf"$\text{{Ecuacion empirica: }} {var_y} = {pendiente:.2f}*{var_x} + ({b:.2f})$",color="#fff766")
 
 #Los puntos tomados
 plt.plot(close_points_cord_x,close_points_cord_y,"o",label="Datos Tomados", color="#ff6699",markersize=3)
 #Puntos aleatorios de le recta
-plt.plot(points_m_x,points_m_y,"o", color="blue",markersize=3)
+plt.plot(points_m_x,points_m_y,"o",label = "Puntos para el calculo de la pendiente", color="red",markersize=12)
 plt.grid(True, linestyle='--', color='gray', linewidth=0.5)
 
 for i, (x, y) in enumerate(points_to_plot):
-    plt.text(x, y, f'P{i+1} ({x}, {y})', fontsize=8, ha='right', color='black',weight="bold")
+    plt.text(x, y, f'P{i+1} ({x}, {y})', fontsize=8, ha='right', color='#ff6699',weight="bold")
 
 
 
