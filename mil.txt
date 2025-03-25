@@ -1,0 +1,27 @@
+Titulo de la grafica
+$V \text{ vs } T^2$
+Eje_x(Unidades),Eje_y(Unidades)
+$T^2 (s^2$),$V \left(\frac{m}{s}\right)$
+Variables Ecuacione Empirica Formato(Variable Dependiente, Variable Independiente)
+V,T^2
+Medida Eje_x,Medida Eje_y
+23,18
+Factor de escala Eje_x, Factor de escala Eje_y
+0.46,10.6
+Puntos Tomados para la toma de puntos debes seguir el siguiente formato: 
+Si tiene que sacar promedio debera poner primero todos los datos de la observacion en "x" separados 
+por coma y luego en el eje "y" asi sucesivamente para todas las observaciones.
+1.32,1.32
+23.8,23.8,23.8
+2.19,2.19
+39.4,39.4,39.4
+4.36
+78.6
+5.93
+106
+6.70
+120.70
+8.70
+156.6
+10.60
+190.1

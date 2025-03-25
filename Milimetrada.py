@@ -1,13 +1,46 @@
 import numpy as np
 import matplotlib.pyplot as plt
-#Se le pide al usuario para graficar los puntos en la hoja milimetrada
-print("Ten en cuenta que los numeros decimales debes escribirlos con un punto. \n Ejemplo: 23.10 \nTambien ten en cuenta que los datos seran separados por una coma")
+import random as rd
+#Se obtienen los datos a partir de un archivo mil.txt
 
-axis_x,axis_y= input("Digame que representa el eje x e y con palabras, Formato(Ejex,Ejey): ").split(",")
+f = open(r"mil.txt","r")
+f.readline()
+title = rf"{f.readline()}".removesuffix(r"\n")
 
-numerox,factorx = input("Ingrese el numero de datos en el eje x(los cm), ademas de su factor de escala (x,f.h): ").split(",")
-numeroy,factory = input("Ingrese el numero de datos en el eje y(los cm), ademas de su factor de escala (y,f.v ): ").split(",")
+f.readline()
+axis_x,axis_y = rf"{f.readline()}".removesuffix(r"\n").split(",")
+f.readline()
+var_y,var_x = f.readline().strip().split(",")
+f.readline()
+#Se obtiene la medida de los ejes x e y
+numerox,numeroy = f.readline().strip().split(",")
+f.readline()
+#Se obtienen el factor de escala de los ejes x e y 
+factorx,factory = f.readline().strip().split(",")
+f.readline(),f.readline(),f.readline()
 
+#Se obtienen los datos de los puntos que se graficaran
+points_to_plot = []
+
+i=0
+x,y= 0,0
+for lines in f:
+    if i % 2 == 0:
+        x_raw = lines.strip().split(",")
+        
+        for elem in x_raw:
+            x += float(elem)
+        x = x/len(x_raw)
+    else:
+        y_raw = lines.strip().split(",")
+
+        for elem in y_raw:
+            y += float(elem)
+        y = y/len(y_raw)
+        points_to_plot.append((x,y))
+        x,y = 0,0
+    i+=1
+f.close()
 
 # Distancia de los cuadritos en la hoja milimetrada
 f_x = float(factorx)/10
@@ -49,8 +82,11 @@ n=0
 for i in range(int(numeroy)):
     n += float(factory)
     y_points.append(round(n,2))
-x_points.insert(0,0)
-y_points.insert(0,0)
+
+
+plt.text(x, y, f'{i+1} ({x}, {y})', fontsize=8, ha='right', color='black')
+
+
 print("---------------------------------------------")
 print(f"Puntos del eje x: \n {x_points}\n")
 print(f"Puntos del eje y: \n {y_points}\n")
@@ -60,10 +96,7 @@ print("Incertidumbre de los ejes: ")
 print(f"x: {f_x/2}")
 print(f"y: {f_y/2}\n")
 
-points_to_plot = []
-for i in range(int(input("Cuantos puntos deseas graficar?: "))):
-  x,y = input(f"Ingrese el punto {i+1} (x,y): ").split(",")
-  points_to_plot.append((float(x),float(y)))
+
 
 
 print("""
@@ -93,17 +126,45 @@ close_points_cord_x = np.array(close_points_cord_x)
 close_points_cord_y = np.array(close_points_cord_y)
 
 
+
 #Arma automaticamente la recta
 #Una recta de la forma y = mx *b
 m,b = np.polyfit(close_points_cord_x,close_points_cord_y,1)
 y_lin = m*np.array(x_points)+b
-plt.plot(np.array(x_points),y_lin,"-", label="Recta",color="#fff766")
+
+
+#Se agarra dos puntos aleatorios para calcular la pendiente
+x_1 = rd.choice(x_points)
+x_2 = rd.choice(x_points)
+while x_1 == x_2 or x_1 < x_2:
+    x_1 = rd.choice(x_points)
+    x_2 = rd.choice(x_points)
+y_1 = m*x_1+b
+y_2 = m*x_2+b
+
+#Calculo donde se veria en la grafica milimetrada
+closest_x_1, n_x_1, closest_y_1, n_y_1 = find_closest_coords(x_points, y_points, x_1, y_1, f_x, f_y)
+closest_x_2, n_x_2, closest_y_2, n_y_2 = find_closest_coords(x_points, y_points, x_2, y_2, f_x, f_y)
+points_m_x = [closest_x_1+f_x*n_x_1,closest_x_2+f_x*n_x_2]
+points_m_y = [closest_y_1+f_y*n_y_1,closest_y_2+f_y*n_y_2]
+
+
+
+for i, (x, y) in enumerate(zip(points_m_x, points_m_y)):
+    plt.text(x+6*f_x, y-6*f_y, f'P{i+1} ({x:.2f}, {y:.2f})', fontsize=8, ha='right', color='blue',weight="bold")
+
+###Calculo de la pendiente
+pendiente = (points_m_y[1]-points_m_y[0])/(points_m_x[1]-points_m_x[0])
+plt.plot(np.array(x_points),y_lin,"-", label=rf"$Ecuacion empirica: {var_y} = {pendiente:.2f}*{var_x} + ({b:.2f})$",color="#fff766")
 
 #Los puntos tomados
 plt.plot(close_points_cord_x,close_points_cord_y,"o",label="Datos Tomados", color="#ff6699",markersize=3)
-
+#Puntos aleatorios de le recta
+plt.plot(points_m_x,points_m_y,"o", color="blue",markersize=3)
 plt.grid(True, linestyle='--', color='gray', linewidth=0.5)
 
+for i, (x, y) in enumerate(points_to_plot):
+    plt.text(x, y, f'P{i+1} ({x}, {y})', fontsize=8, ha='right', color='black',weight="bold")
 
 
 
@@ -111,12 +172,8 @@ plt.grid(True, linestyle='--', color='gray', linewidth=0.5)
 #Los datos en x, y
 plt.ylabel(axis_y)
 plt.xlabel(axis_x)
-plt.title(f"Previsualizacion de Gráfica {axis_y} vs {axis_x}")
+plt.title(rf"{title}")
 plt.xticks(x_points,rotation = 90)
 plt.yticks(y_points)
 plt.legend()
 plt.show()
-
-
-print("-----------------------------------------------\n")
-print(f"Probable ecuacion empirica:  \n {axis_y}= {round(m,2)} * {axis_x}  +({round(b,2)})")
